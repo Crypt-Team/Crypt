@@ -1,5 +1,6 @@
 import logging
 import customtkinter as ctk
+from .. import __version__
 from .screens.login import LoginScreen
 from .screens.inbox import InboxScreen
 from .screens.compose import ComposeScreen
@@ -25,6 +26,10 @@ class CryptApp(ctk.CTk):
                             size=(101, 34))
         logo_label = ctk.CTkLabel(topbar, image=logo, text="")
         logo_label.pack(pady=10)
+        connection_status_label = ctk.CTkLabel(topbar, text="Idle")
+        connection_status_label.pack(pady=10)
+        connection_status = ctk.CTkProgressBar(topbar, mode="indeterminate")
+        connection_status.pack(pady=5)
 
         tabview = ctk.CTkTabview(self, width=200)
         tabview.pack(fill="both", expand=True)
@@ -35,6 +40,9 @@ class CryptApp(ctk.CTk):
         InboxScreen(InboxTab, self).pack(fill="both", expand=True)
         ComposeScreen(ComposeTab, self).pack(fill="both", expand=True)
         DecryptScreen(DecryptTab, self).pack(fill="both", expand=True)
+
+        ctk.CTkLabel(self, text=f"Version {__version__}").pack(side="bottom",
+                                                               pady=5)
 
         self.withdraw()
         self.loginscreen = LoginScreen(self, self)

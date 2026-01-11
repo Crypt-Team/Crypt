@@ -1,5 +1,5 @@
 import logging
-from ui import CryptApp
+from .ui import CryptApp
 
 logger = logging.getLogger("crypt")
 

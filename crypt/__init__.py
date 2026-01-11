@@ -1,3 +1,5 @@
+__version__ = "2.0a1"
+
 import logging
 
 logger = logging.getLogger("crypt")
