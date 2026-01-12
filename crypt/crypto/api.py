@@ -30,6 +30,7 @@ def signup(username, email, password):
         return f"User {username} already exists"
     else:
         r.raise_for_status()
+        return "Signup successful"
 
 
 def login(username, password):

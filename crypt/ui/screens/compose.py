@@ -23,10 +23,13 @@ class ComposeScreen(ctk.CTkFrame):
             self, text="Encrypt", command=self.encrypt
         ).pack(pady=5)
 
+        self.status_label = ctk.CTkLabel(self, text="")
+        self.status_label.pack(pady=5)
+
     def encrypt(self):
         message = self.message.get("1.0", "end-1c")
-        recipients = self.recipients.get().split(",")
-        logger.info(f"Encrypting message for {recipients}: {message}")
+        recipients = [r.strip() for r in self.recipients.get().split(",") if r.strip()]
+        logger.info(f"Encrypting message for {recipients}")
         try:
             encrypted_message = encrypt_message(self.app.user_keys, recipients,
                                                 message)
@@ -37,4 +40,4 @@ class ComposeScreen(ctk.CTkFrame):
         self.message.delete("1.0", "end")
         self.message.insert("1.0", encrypted_message)
         logger.info("Message encrypted and displayed in textbox.")
-        ctk.CTkLabel(self, text="Message encrypted!").pack(pady=5)
+        self.status_label.configure(text="Message encrypted!")

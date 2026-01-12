@@ -1,11 +1,12 @@
 from pathlib import Path
 import json
+import os
 
-DATA = Path("data")
+DATA = Path(os.environ.get("CRYPTO_CACHE_DIR", Path(__file__).parent.parent / "data"))
 SECRET = DATA / "secrets.bin"
 PUBLIC = DATA / "public_keys.json"
 
-DATA.mkdir(exist_ok=True)
+DATA.mkdir(parents=True, exist_ok=True)
 
 
 def store_encrypted_keys(blob: bytes):
@@ -26,6 +27,9 @@ def load_public_keys() -> dict | None:
     if not PUBLIC.exists():
         return None
     try:
-        return json.loads(PUBLIC.read_text())
+        value = json.loads(PUBLIC.read_text())
+        if isinstance(value, dict):
+            return value
+        return None
     except json.JSONDecodeError:
         return None

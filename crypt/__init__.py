@@ -1,4 +1,4 @@
-__version__ = "2.0a1"
+__version__ = "2.0a2"
 
 import logging
 
@@ -14,12 +14,10 @@ handler = logging.FileHandler("crypt.log", encoding="utf-8")
 handler.setFormatter(formatter)
 
 # Only add if not already added
-if not logger.hasHandlers():
+existing_handlers = [h for h in logger.handlers if isinstance(h, logging.FileHandler) and h.baseFilename.endswith("crypt.log")]
+if not existing_handlers:
     logger.addHandler(handler)
 
 
-logger.info("Initializing Crypt")
-
-if __name__ == "__main__":
-    from .main import main
-    main()
+if logger.isEnabledFor(logging.DEBUG):
+    logger.debug("Initializing Crypt")

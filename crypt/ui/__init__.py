@@ -12,12 +12,13 @@ logger = logging.getLogger("crypt.ui")
 class Topbar(ctk.CTkFrame):
     def __init__(self, parent, fg_color="#0f0121"):
         from PIL import Image
-        super().__init__(parent)
+        import os
+        super().__init__(parent, fg_color=fg_color)
 
         self.pack(side="top")
-        logo = ctk.CTkImage(Image.open("assets/logo.png"),
-                            size=(101, 34))
-        logo_label = ctk.CTkLabel(self, image=logo, text="")
+        logo_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "logo.png")
+        self.logo = ctk.CTkImage(Image.open(logo_path), size=(101, 34))
+        logo_label = ctk.CTkLabel(self, image=self.logo, text="")
         logo_label.pack(pady=5)
 
 
@@ -29,13 +30,13 @@ class CryptApp(ctk.CTk):
         ctk.set_default_color_theme("dark-blue")
 
         self.title("Crypt")
-        self.geometry("600x500")
+        self.geometry("600x600")
 
         topbar = Topbar(self)
-        connection_status_label = ctk.CTkLabel(topbar, text="Idle")
-        connection_status_label.pack(padx=10)
-        connection_status = ctk.CTkProgressBar(topbar, mode="indeterminate")
-        connection_status.pack(pady=5)
+        self.connection_status_label = ctk.CTkLabel(topbar, text="Idle")
+        self.connection_status_label.pack(padx=10)
+        self.connection_status = ctk.CTkProgressBar(topbar, mode="indeterminate")
+        self.connection_status.pack(pady=5)
 
         tabview = ctk.CTkTabview(self, width=200)
         tabview.pack(fill="both", expand=True)
