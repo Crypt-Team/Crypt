@@ -5,9 +5,20 @@ from .screens.login import LoginScreen
 from .screens.inbox import InboxScreen
 from .screens.compose import ComposeScreen
 from .screens.decrypt import DecryptScreen
-from PIL import Image
 
 logger = logging.getLogger("crypt.ui")
+
+
+class Topbar(ctk.CTkFrame):
+    def __init__(self, parent, fg_color="#0f0121"):
+        from PIL import Image
+        super().__init__(parent)
+
+        self.pack(side="top")
+        logo = ctk.CTkImage(Image.open("assets/logo.png"),
+                            size=(101, 34))
+        logo_label = ctk.CTkLabel(self, image=logo, text="")
+        logo_label.pack(pady=5)
 
 
 class CryptApp(ctk.CTk):
@@ -20,14 +31,9 @@ class CryptApp(ctk.CTk):
         self.title("Crypt")
         self.geometry("600x500")
 
-        topbar = ctk.CTkFrame(self, fg_color="#0f0121")
-        topbar.pack(side="top")
-        logo = ctk.CTkImage(Image.open("crypt/assets/logo.png"),
-                            size=(101, 34))
-        logo_label = ctk.CTkLabel(topbar, image=logo, text="")
-        logo_label.pack(pady=10)
+        topbar = Topbar(self)
         connection_status_label = ctk.CTkLabel(topbar, text="Idle")
-        connection_status_label.pack(pady=10)
+        connection_status_label.pack(padx=10)
         connection_status = ctk.CTkProgressBar(topbar, mode="indeterminate")
         connection_status.pack(pady=5)
 
