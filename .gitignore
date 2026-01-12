@@ -1,0 +1,7 @@
+**/__pycache__/
+data/
+*.pyc
+*.pyo
+*.pyd
+
+*.log
