@@ -51,6 +51,7 @@ class LoginScreen(ctk.CTkToplevel):
         try:
             self.app.user_keys = api.login(self.username, self.password)
         except Exception as e:
+            logger.exception("Login failed", exc_info=True)
             msgbox.showerror("Login Failed", str(e))
             return
         self.destroy()

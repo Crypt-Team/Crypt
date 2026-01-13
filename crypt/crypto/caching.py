@@ -2,7 +2,11 @@ from pathlib import Path
 import json
 import os
 
-DATA = Path(os.environ.get("CRYPTO_CACHE_DIR", Path(__file__).parent.parent / "data"))
+DATA = (
+    Path(os.environ.get("APPDATA")) / "Crypt"
+    if os.getenv("ENV") == "prod"
+    else Path.cwd() / "data"
+)
 SECRET = DATA / "secrets.bin"
 PUBLIC = DATA / "public_keys.json"
 

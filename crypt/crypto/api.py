@@ -35,14 +35,17 @@ def signup(username, email, password):
 
 def login(username, password):
     if (keys := load_encrypted_keys()):
-        return unwrap_keys(keys, password)
+        try:
+            return unwrap_keys(keys, password)
+        except Exception:
+            logger.warning("Failed to unwrap cached keys, fetching from server")
     r = requests.post(API + "/login", json={
         "username": username,
         "password": password
-    }).json()
-    if r == {"error": "Invalid login"}:
+    })
+    if r.status_code == 401:
         raise ValueError("Invalid username or password")
-    wrapped_keys = b32d(r["wrapped_keys"])
+    wrapped_keys = b32d(r.json()["wrapped_keys"])
     store_encrypted_keys(wrapped_keys)
     return unwrap_keys(wrapped_keys, password)
 

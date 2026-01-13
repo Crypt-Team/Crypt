@@ -16,7 +16,7 @@ class Topbar(ctk.CTkFrame):
         super().__init__(parent, fg_color=fg_color)
 
         self.pack(side="top")
-        logo_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "logo.png")
+        logo_path = os.path.join("assets", "logo.png")
         self.logo = ctk.CTkImage(Image.open(logo_path), size=(101, 34))
         logo_label = ctk.CTkLabel(self, image=self.logo, text="")
         logo_label.pack(pady=5)
