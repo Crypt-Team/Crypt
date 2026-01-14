@@ -2,76 +2,27 @@ import os
 import json
 import base64
 import ulid
-from argon2.low_level import hash_secret_raw, Type
+import logging
 from cryptography.hazmat.primitives.asymmetric import x25519, ed25519
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
+logger = logging.getLogger("crypt.crypto")
+
 
 def b32e(b): return base64.b32encode(b).decode()
 def b32d(s): return base64.b32decode(s.encode())
 
-# ---------- KEY MANAGEMENT ----------
 
-
-def generate_keys():
-    return {
-        "x_priv": x25519.X25519PrivateKey.generate(),
-        "e_priv": ed25519.Ed25519PrivateKey.generate()
-    }
-
-
-def wrap_keys(keys, password):
-    salt = os.urandom(16)
-    k = hash_secret_raw(
-        password.encode(), salt,
-        time_cost=3, memory_cost=2**17,
-        parallelism=1, hash_len=32,
-        type=Type.ID
-    )
-    aes = AESGCM(k)
-    nonce = os.urandom(12)
-
-    blob = json.dumps({
-        "x": b32e(keys["x_priv"].private_bytes_raw()),
-        "e": b32e(keys["e_priv"].private_bytes_raw())
-    }).encode()
-
-    ct = aes.encrypt(nonce, blob, None)
-    return b32e(salt + nonce + ct)
-
-
-def unwrap_keys(blob, password):
-    salt, nonce, ct = blob[:16], blob[16:28], blob[28:]
-
-    k = hash_secret_raw(
-        password.encode(), salt,
-        time_cost=3, memory_cost=2**17,
-        parallelism=1, hash_len=32,
-        type=Type.ID
-    )
-    aes = AESGCM(k)
-    data = json.loads(aes.decrypt(nonce, ct, None))
-
-    return {
-        "x_priv": x25519.X25519PrivateKey.from_private_bytes(b32d(data["x"])),
-        "e_priv": ed25519.Ed25519PrivateKey.from_private_bytes(b32d(data["e"]))
-    }
-
-
-# ---------- MESSAGING ----------
-from .api import get_pub
-
-
-def encrypt_message(sender_keys: dict, recipient_usernames: list, body: str):
+def encrypt_message(sender_keys: dict, sender_username: str,
+                    recipient_usernames: list, body: str):
+    from .api import get_pub
     # 1) Generate one session key
     session_key = AESGCM.generate_key(256)
     aes_msg = AESGCM(session_key)
     msg_nonce = os.urandom(12)
-    message = json.dumps({"from": b32e(sender_keys["e_priv"]
-                                       .public_key()
-                                       .public_bytes_raw()),
+    message = json.dumps({"from": sender_username,
                           "body": body})
 
     ciphertext = aes_msg.encrypt(msg_nonce, message.encode(), None)
@@ -116,6 +67,7 @@ def encrypt_message(sender_keys: dict, recipient_usernames: list, body: str):
 
 
 def decrypt_message(recipient_keys: dict, payload: str):
+    from .api import get_pub
     _, T, keys_blob, C_blob, sig_blob, _ = payload.split("$$")
 
     cipher_data = b32d(C_blob)
@@ -148,17 +100,19 @@ def decrypt_message(recipient_keys: dict, payload: str):
             )
 
             message = json.loads(msg.decode())
-
+            
+            print(f"DEBUG: Decrypted message: {message}")  # Temporary debug print
+            
             # Verify signature
-            ed25519.Ed25519PublicKey.from_public_bytes(b32d(message["from"]))\
-                .verify(b32d(sig_blob), message["body"].encode())
+            _, sender_e_pub = get_pub(message["from"])
+            ed25519.Ed25519PublicKey.from_public_bytes(sender_e_pub).verify(b32d(sig_blob), message["body"].encode())
 
             return {"timestamp": T, "message": message["body"]}
 
         except Exception:
+            logger.exception("Failed to decrypt with one of the key blocks")
             continue
 
-    raise ValueError("Message not intended for this recipient")
 
 
 """

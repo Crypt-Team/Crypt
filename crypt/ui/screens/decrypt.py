@@ -35,5 +35,5 @@ class DecryptScreen(ctk.CTkFrame):
             logger.exception("Decryption failed", exc_info=True)
             return
         self.input_box.delete("1.0", "end")
-        self.input_box.insert("1.0", decrypted_message)
+        self.input_box.insert("1.0", decrypted_message["message"])
         self.status_label.configure(text="Message decrypted!")

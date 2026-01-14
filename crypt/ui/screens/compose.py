@@ -31,8 +31,9 @@ class ComposeScreen(ctk.CTkFrame):
         recipients = [r.strip() for r in self.recipients.get().split(",") if r.strip()]
         logger.info(f"Encrypting message for {recipients}")
         try:
-            encrypted_message = encrypt_message(self.app.user_keys, recipients,
-                                                message)
+            encrypted_message = encrypt_message(self.app.user_keys,
+                                                self.app.username,
+                                                recipients, message)
         except Exception as e:
             msgbox.showerror("Encryption Failed", str(e))
             return

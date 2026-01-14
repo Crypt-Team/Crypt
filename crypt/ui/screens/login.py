@@ -46,10 +46,10 @@ class LoginScreen(ctk.CTkToplevel):
         ).pack(pady=10)
 
     def login(self):
-        self.username = self.usernameentry.get()
+        self.app.username = self.usernameentry.get()
         self.password = self.passwordentry.get()
         try:
-            self.app.user_keys = api.login(self.username, self.password)
+            self.app.user_keys = api.login(self.app.username, self.password)
         except Exception as e:
             logger.exception("Login failed", exc_info=True)
             msgbox.showerror("Login Failed", str(e))
@@ -58,9 +58,8 @@ class LoginScreen(ctk.CTkToplevel):
         self.app.deiconify()
 
     def signup(self):
-        self.username = self.usernameentry.get()
-        self.password = self.passwordentry.get()
-        self.email = ctk.CTkInputDialog(text="Enter your email for signup:",
-                                        title="Signup").get_input()
-        msgbox.showinfo("Signup", api.signup(self.username, self.email,
-                                             self.password))
+        msgbox.showinfo("Signup", api.signup(self.usernameentry.get(),
+                                             ctk.CTkInputDialog(
+                                                 text="Enter your email:",
+                                                 title="Signup").get_input(),
+                                             self.passwordentry.get()))

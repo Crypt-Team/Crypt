@@ -1,8 +1,8 @@
 import base64
 import requests
 import logging
-from ..crypto import generate_keys, wrap_keys, unwrap_keys
-from ..crypto.caching import load_encrypted_keys, store_encrypted_keys, \
+from .keys import generate_keys, wrap_keys, unwrap_keys
+from .caching import load_encrypted_keys, store_encrypted_keys, \
     load_public_keys, store_public_keys
 
 logger = logging.getLogger("crypt.crypto.api")
